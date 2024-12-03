@@ -1,1 +1,1 @@
-# 30DayMappingChalleng2024
+# 30DayMappingChallenge2024
