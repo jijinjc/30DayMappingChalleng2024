@@ -1,0 +1,5 @@
+"0","filenames = list.files("
+"0","  path = file.path(getwd(),""data/HydroRIVERS_v10_as_shp""),"
+"0","  pattern = "".shp"","
+"0","  full.names = TRUE"
+"0",")"

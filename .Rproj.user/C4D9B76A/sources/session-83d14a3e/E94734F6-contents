@@ -1,0 +1,56 @@
+---
+title: "AI-09"
+author: "Jack Chen"
+date: "2024-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(sf) 
+library(ggspatial)
+```
+
+```{r}
+stuff <- data.frame(
+  Type = c("Park", "Trail", "Park", "Trail"),
+  Color = c("green", "blue", "green", "blue"),
+  Lat = c(40.748817, 40.749617, 40.747417, 40.746917),
+  Long = c(-73.985428, -73.986928, -73.987328, -73.988428)
+)
+```
+
+```{r fig.width = 8, wig.height = 6}
+aimap = ggplot(stuff) +
+  geom_point(aes(x = Long, y = Lat, color = Type), size = 3, alpha = 0.7) +
+  scale_color_manual(values = c("Park" = "green", "Trail" = "blue")) +  
+  labs(
+    title = "Public Parks and Trails in the Area",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Location Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 12),
+    plot.title = element_text(size = 14, face = "bold")
+  ) +
+  geom_text(aes(x = -73.985, y = 40.75, label = "N"), size = 6, fontface = "bold", color = "black") +  # Add "N"
+  coord_fixed(ratio = 1)
+
+aimap
+
+ggsave("Results/AI-09-1.png", aimap, height = 6, width = 8)
+```
+
+
+
+
+
+
+

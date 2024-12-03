@@ -1,0 +1,3 @@
+"0","all_overture = get_all_overture_types()"
+"0","buildings <- record_batch_reader(overture_type = 'building', bbox = c(xmin, ymin, xmax, ymax))"
+"0","trans_seg = record_batch_reader(overture_type = 'segment', bbox = c(xmin, ymin, xmax, ymax))"

@@ -1,0 +1,79 @@
+---
+title: "Arctic-11"
+author: "Jack Chen"
+date: "2024-11-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+library(raster)
+library(rWind)
+library(lubridate)
+library(classInt)
+library(metR)
+library(oce)
+library(terra)
+library(hms)
+library(giscoR)
+loadfonts(device = "win")
+```
+
+```{r}
+gfch = raster("data/NDSI_gfch.tif")
+print(gfch)
+gfch_spdf = as(gfch, "SpatialPixelsDataFrame")
+gfch_df = as.data.frame(gfch_spdf)
+colnames(gfch_df) <- c("value", "x", "y")
+```
+
+```{r}
+points_df <- data.frame(
+  x = c(-82.88880987647373, -81.00088427373657),
+  y = c(76.41894875370522, 76.20785545688933),
+  name = c("Grise Fiord", "Craig Harbour")
+)
+
+```
+
+```{r plot, fig.width=10, fig.height=8}
+arctic_plot <- ggplot() +
+  geom_tile(data=gfch_df, aes(x=x, y=y, fill=value)) +
+  scale_fill_gradientn(colors = c("#314834", "white"), limits = c(-1, 1)) +  
+  geom_point(data = points_df, aes(x = x, y = y), color = "#3b5ca2", size = 3) +  
+  #geom_text(data = points_df, aes(x = x, y = y, label = name), vjust = -1, hjust = 1.5, color = "black") +
+  theme_void() +
+  coord_sf(crs = 4326, 
+            ylim = c(76.10020771922385, 76.95234218880566),
+            xlim = c(-85.43676873654424, -80.41327020138799),
+            expand = FALSE) + 
+  annotate("text", x = -81.30301, y = 76.24020, label = "Craig Harbour", color = "#3b5ca2", size = 3, hjust = 0) + 
+  annotate("text", x = -83.15502, y = 76.38050, label = "Grise Fiord", color = "#3b5ca2", size = 3, ) +
+  labs(fill = "NDSI") + 
+  theme(legend.position="none") +
+  annotate("text", x = -85.4, y = 76.89, label = paste0("Within the Arctic Circle:\nNunavut, Canada"), color = "#233761", size = 10, hjust = 0, family = "Calibri") +
+  geom_richtext(aes(x = -85.4, y = 76.2, label = paste0("The Arctic is a sacred area,<br>and to better understand the impact<br>humans have on the extreme cold, the<br>Normalized Difference Snow Index is<br>used to show from <span style='color:darkgreen;'>-1</span> to <span style='color:white;'>1</span> (no snow to snow presence)<br>to reflect the presence of snow in an area.")), color = "#233761", size = 3.5, hjust = 0, family = "Calibri", inherit.aes = F, fill = NA, label.color = NA) 
+        
+arctic_plot
+
+ggsave("Results/arctic-11.jpg", arctic_plot, bg="#3b5ca2", height=8, width=10)
+```
+

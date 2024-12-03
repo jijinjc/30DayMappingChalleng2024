@@ -1,0 +1,1 @@
+{"height":4.944375772558714,"width":8.0,"size_behavior":1,"conditions":[[1,"警告: \u001B[38;5;250mAll aesthetics have length 1, but the data has 4 rows.\n\u001B[36mℹ\u001B[38;5;250m Please consider using `annotate()` or provide this layer with data containing a single row.\u001B[39m"]]}

@@ -1,0 +1,8 @@
+"0","beento = countries %>%
+  mutate(times = case_when(id %in% c(""CAN"", ""CHN"", ""USA"") ~ ""2+"",
+                           id %in% c(c(""ATA"", ""AUT"", ""LUX"", ""MEX"", ""BEL"", ""CHL"", ""CHE"", ""NLD"", ""CUB"", ""DEU"", ""ECU"", ""SGP"", ""FRA"", ""GBR"", ""THA"", ""HKG"", ""TWN"", ""TZA"", ""ISL"", ""CZE"")) ~ ""1"",
+                           TRUE ~ ""0"")) %>%
+  st_transform(crs = ""4326"")
+"
+"2","错误: crs not found: is it missing?
+"

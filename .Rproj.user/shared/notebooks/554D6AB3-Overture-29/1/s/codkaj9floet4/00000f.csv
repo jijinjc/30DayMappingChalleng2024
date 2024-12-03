@@ -1,0 +1,21 @@
+"0","van_builds = buildings %>%
+  select(id, geometry, height) %>%
+  #collect() %>%
+  mutate(height = ifelse(is.na(height), 8, height)) %>%
+  st_transform(crs = 4326) %>%
+  st_as_sf()
+van_builds = buildings %>%
+  select(id, geometry, height) %>%
+  #collect() %>%
+  mutate(height = ifelse(is.na(height), 8, height)) %>%
+  st_transform(crs = 4326) %>%
+  st_as_sf()
+van_builds$geometry <- st_cast(van_builds$geometry, ""POLYGON"")
+"
+"2","Warning: polygon from first part only"
+"2","Warning: polygon from first part only"
+"2","Warning: polygon from first part only"
+"2","Warning: polygon from first part only"
+"0","van_builds.c = van_builds %>%"
+"0","  st_intersection(van_bound)"
+"2","Warning: attribute variables are assumed to be spatially constant throughout all geometries"

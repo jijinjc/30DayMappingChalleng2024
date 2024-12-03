@@ -1,0 +1,6 @@
+"0","drakewind = terra::rast(""data/drake-wind/drake-wind.nc"")"
+"0",""
+"0","drakewinddf = drakewind %>%"
+"0","  as.data.frame("
+"0","    xy = T, na.rm = T"
+"0","  )"

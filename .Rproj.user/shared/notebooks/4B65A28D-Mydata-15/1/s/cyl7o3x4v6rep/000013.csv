@@ -1,0 +1,15 @@
+"0","library(showtext)
+"
+"2","警告: 程序包‘showtext’是用R版本4.4.2 来建造的"
+"2","载入需要的程序包：showtextdb
+"
+"2","警告: 程序包‘showtextdb’是用R版本4.4.2 来建造的"
+"2","
+载入程序包：‘showtextdb’
+
+"
+"2","The following object is masked from ‘package:extrafont’:
+
+    font_install
+
+"

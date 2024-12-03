@@ -1,0 +1,7 @@
+"0","drakewindstream$speed = sqrt(drakewindstream$u^2 + drakewindstream$v^2)"
+"0",""
+"0","breaks = classInt::classIntervals("
+"0","  drakewindstream$speed,"
+"0","  n=6,"
+"0","  style = ""equal"""
+"0",")$brks"

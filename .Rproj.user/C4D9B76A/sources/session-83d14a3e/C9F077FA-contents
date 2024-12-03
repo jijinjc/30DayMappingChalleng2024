@@ -1,0 +1,136 @@
+---
+title: "Journey-05"
+author: "Jack Chen"
+date: "2024-11-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(osmdata)
+library(dodgr)
+library(sf)
+library(maptiles)
+library(tidyterra)
+library(dplyr)
+library(ggtext)
+library(extrafont)
+library(ggimage)
+```
+
+```{r}
+otv = read.csv("data/OTV.csv")
+
+otvpts = otv %>%
+  st_as_sf(coords = c("Long", "Lat"), crs = 4326)
+
+otv_route = st_read("data/otv-route.geojson") %>%
+  mutate(Team = case_when(Color == "#dc271b" ~ "Team Rocket",
+                   TRUE ~ "Team Pikachu"))
+```
+
+```{r}
+otvbbox = matrix(data = c(-118.50393375299043, -118.31626572527703, 34.00263990806221, 34.132091829391655),
+                  nrow = 2,
+                  byrow = TRUE) 
+
+xmin = otvbbox[1]
+ymin = otvbbox[2]
+xmax = otvbbox[3]
+ymax = otvbbox[4]
+
+otvbbox2 = c(
+  xmin = xmin, ymin = ymin,
+  xmax = xmax, ymax = ymax
+)
+
+print(c(xmin, ymin, xmax, ymax))
+
+otvbboxsf = otvbbox2 %>%
+  sf::st_bbox(crs=4326) %>%
+  sf::st_as_sfc()
+```
+
+```{r}
+otv_st = maptiles::get_tiles(
+  otvbboxsf,
+  provider = "CartoDB.Positron",
+  zoom = 14
+)
+```
+
+```{r}
+colnames(otvbbox) = c("min", "max")
+rownames(otvbbox) = c("x", "y")
+
+otv_osm = opq(
+  bbox = otvbbox,
+  timeout = 50) %>%
+  add_osm_feature(key = "highway") %>%
+  osmdata_sf()
+
+otv_roads = otv_osm$osm_lines
+```
+
+```{r fig.width=8, fig.height=6.5}
+#font_add_google("Morai One")
+
+#showtext::showtext_auto()
+#showtext::showtext_opts(dpi = 300)
+
+otvplot = ggplot() +
+  tidyterra::geom_spatraster_rgb(
+    data = otv_st
+  ) +
+  geom_sf(
+    data = otv_roads,
+    color = "grey",
+    alpha = .25,
+    size = .05
+  ) +
+  geom_sf(
+    data = otv_route,
+    aes(color = Team),
+    linewidth = 1.5
+  ) +
+  scale_color_manual(values = c(
+    "Team Rocket" = "#dc271b", 
+    "Team Pikachu" = "#f8d020"
+  )) +
+  geom_sf(
+    data = otvpts,
+    color = "black",
+    inherit.aes = F
+  ) +
+  coord_sf(ylim = c(ymin, ymax),
+           xlim = c(xmin, xmax),
+           expand = FALSE) +
+  theme_void() +
+  geom_richtext(aes(x = -118.50, y = 34.12550, label = paste0("Offline TV's")), color = "black", size = 11, family = "Moirai One", hjust=0,vjust = 1,inherit.aes = F, fill = NA, label.color = NA) +
+  geom_richtext(aes(x = -118.50, y = 34.08450, label = paste0("Adventure!")), color = "black", size = 12, family = "Tiny5", hjust=0,vjust = 1,inherit.aes = F, fill = NA, label.color = NA) +
+  geom_image(aes(x = -118.367, y = 34.1235, image = "data/Pikachu.png"), size = .1) +
+  geom_image(aes(x = -118.3675, y = 34.11, image = "data/Rocket.png"), size = .1) +
+  geom_image(aes(x = -118.4825, y = 34.101, image = "data/Pokemon_Go.png"), size = 0.325, hjust = 0) +
+  geom_richtext(aes(x = -118.37, y = 34.015, label = paste0("WINNER!")), color = "#cda254", size = 8, family = "Modak", hjust=0,vjust = 1,inherit.aes = F, fill = NA, label.color = NA) +
+  geom_image(aes(x = -118.353, y = 34.021, image = "data/Pikachu.png"), size = .1) +
+  geom_image(aes(x = -118.3275, y = 34.12721, image = "data/start.png"), size = 0.1, hjust = 0) +
+  geom_image(aes(x = -118.3399, y = 34.10166, image = "data/cd.png"), size = 0.05, hjust = 0) +
+  geom_image(aes(x = -118.3554, y = 34.06391, image = "data/card.png"), size = 0.05, hjust = 0) +
+  geom_image(aes(x = -118.3603, y = 34.06311, image = "data/pen.png"), size = 0.09, hjust = 0) +
+  geom_image(aes(x = -118.4958, y = 34.00972, image = "data/gigantamax.png"), size = 0.05, hjust = 0) +
+  theme(legend.position = c(0.6, 0.88),
+        legend.background = element_blank(),
+        legend.title = element_blank(),
+        legend.spacing = unit(1, "cm"),
+        legend.key.height = unit(1.5, "cm"),
+        legend.key = element_blank())
+
+otvplot
+
+ggsave("Results/Journey-05.jpg", otvplot, bg="white", height=6.5, width=8)
+```
+

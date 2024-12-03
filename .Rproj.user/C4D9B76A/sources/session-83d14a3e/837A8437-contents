@@ -1,0 +1,199 @@
+---
+title: "BluePlanet-28"
+author: "Jack Chen"
+date: "2024-11-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+library(raster)
+library(rWind)
+library(lubridate)
+library(classInt)
+library(metR)
+library(oce)
+library(terra)
+library(hms)
+library(giscoR)
+loadfonts(device = "win")
+```
+
+```{r}
+chl = read_sf("data/gadm41_CHL_shp/gadm41_CHL_0.shp")
+arg = read_sf("data/gadm41_ARG_shp/gadm41_ARG_0.shp") 
+ata = read_sf("data/gadm41_ATA_shp/gadm41_ATA_0.shp")
+bathymetry = raster("data/drake_bathymetry/bathymetry.tif")
+b_spdf = as(bathymetry, "SpatialPixelsDataFrame")
+b_df = as.data.frame(b_spdf)
+colnames(b_df) <- c("value", "x", "y")
+```
+
+```{r include=FALSE, eval=FALSE}
+ymin = -66.20423301954537
+xmin = -80.16981937551598
+ymax = -52.1425039723242
+xmax = -51.90104295400113
+```
+
+```{r}
+drakewind = terra::rast("data/drake-wind/drake-wind.nc")
+
+drakewinddf = drakewind %>%
+  as.data.frame(
+    xy = T, na.rm = T
+  )
+```
+
+```{r}
+u = drakewinddf %>%
+  dplyr::select(
+    x, y, 
+    dplyr::starts_with(
+      "u"
+    )
+  ) %>%
+  tidyr::pivot_longer(
+    !c("x", "y"),
+    names_to = "time",
+    values_to = "u10",
+  ) %>%
+  dplyr::group_by(x, y, .groups = "keep") %>%
+  dplyr::summarise(
+    u=mean(u10)
+  ) %>%
+  dplyr::rename(
+    "lon" = "x",
+    "lat" = "y"
+  ) %>%
+  dplyr::select(
+    lon, lat, u
+  )
+
+v = drakewinddf %>%
+  dplyr::select(
+    x, y, 
+    dplyr::starts_with(
+      "v"
+    )
+  ) %>%
+  tidyr::pivot_longer(
+    !c("x", "y"),
+    names_to = "time",
+    values_to = "v10",
+  ) %>%
+  dplyr::group_by(x, y, .groups = "keep") %>%
+  dplyr::summarise(
+    v=mean(v10)
+  ) %>%
+  dplyr::rename(
+    "lon" = "x",
+    "lat" = "y"
+  ) %>%
+  dplyr::select(
+    lon, lat, v
+  )
+```
+
+```{r}
+drakewindstream = inner_join(
+  u, v, by = c("lon", "lat"),
+  relationship = "many-to-many"
+) %>%
+  dplyr::as_tibble()
+```
+
+```{r}
+drakewindstream$speed = sqrt(drakewindstream$u^2 + drakewindstream$v^2)
+
+breaks = classInt::classIntervals(
+  drakewindstream$speed,
+  n=6,
+  style = "equal"
+)$brks
+```
+
+```{r fig.width=8, fig.height=8}
+
+ant_plot <- ggplot() +
+  geom_tile(data=b_df, aes(x=x, y=y, fill=value)) + 
+  geom_sf(data = chl,
+          inherit.aes = FALSE,
+          fill = "transparent",
+          color = "white",
+          alpha = 0.8,
+          linewidth = 0.2) +
+  geom_sf(data = arg,
+          inherit.aes = FALSE,
+          fill = "transparent",
+          color = "white",
+          alpha = 0.8,
+          linewidth = 0.2) +
+  geom_sf(data = ata,
+          inherit.aes = FALSE,
+          fill = "transparent",
+          color = "white",
+          alpha = 0.8,
+          linewidth = 0.2) +
+  # I REALLY REALLY REALLY hoped this would work :(
+  # metR::geom_streamline( 
+  #   data = drakewindstream,
+  #   mapping = aes(
+  #     x=lon,
+  #     y=lat,
+  #     dx=u,
+  #     dy=v,
+  #     colour=speed,
+  #   ),
+  #   L = 2,
+  #   res = 5,
+  #   n = 40,
+  #   arrow = NULL,
+  #   lineend = "round",
+  #   inherit.aes = FALSE
+  # ) +
+  # scale_color_gradientn(
+  #   name = "Average speed (m/s)",
+  #   colours = hcl.colors(
+  #     12, "Plasma"
+  #   ),
+  #   breaks = round(breaks, 0)
+  # ) +
+  # scale_alpha(
+  #   range = c(.2, 1)
+  # ) +
+  # scale_linewidth(
+  #   range = c(.1, .5)
+  # ) +
+  coord_sf(crs = 4326, 
+            ylim = c(-66.20423301954537, -52.1425039723242),
+            xlim = c(-80.16981937551598, -51.90104295400113),
+            expand = FALSE) + 
+  theme_void() +
+  annotate("text", x = -80, y = -63, label = "DRAKE\nPASSAGE", color = "navy", size = 15, hjust = 0, vjust = 1, family = "Elephant") +
+  theme(panel.background = element_rect(color = "blue", fill = "blue"), 
+        legend.position = "none")
+  
+
+ant_plot
+
+ggsave("Results/BluePlanet-28.jpg", ant_plot)
+```

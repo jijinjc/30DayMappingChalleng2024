@@ -1,0 +1,100 @@
+---
+title: "FinalMap-30"
+author: "Jack Chen"
+date: "2024-11-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(osmdata)
+library(dodgr)
+library(sf)
+library(maptiles)
+library(tidyterra)
+library(dplyr)
+library(ggtext)
+library(extrafont)
+library(ggimage)
+```
+
+```{r}
+Runeterra = st_read("data/RuneterraSimplified.geojson")
+
+Runeterra = Runeterra %>%
+  mutate(Color = case_when(Region == "Freljord" ~ "#adf0fc",
+                           Region == "Noxus" ~ "#620001",
+                           Region == "Demacia" ~ "#edd5b2",
+                           Region == "Bilgewater" ~ "#71301b",
+                           Region == "Shadow Isles" ~ "#1e6276",
+                           Region == "Piltover & Zaun" ~ "#fca370",
+                           Region == "Ixtal" ~ "#61b595",
+                           Region == "Icathia/Void" ~ "#891ebc",
+                           Region == "Shurima" ~ "#c49d5c",
+                           Region == "Targon" ~ "#7378b3",
+                           Region == "Ionia" ~ "#c15f80",
+                           TRUE ~ "#999999")) 
+```
+
+```{r fig.width=14, fig.height=7.95}
+runeterra_plot = ggplot() +
+  geom_sf(data = Runeterra,
+          aes(fill = Region),
+          color = NA,
+          inherit.aes = F,
+          ) + 
+  scale_fill_manual(values = setNames(Runeterra$Color, Runeterra$Region)) +
+  theme_void() + 
+  annotate("text", x = -71.5, y = 37, label = "Freljord", color = "#0091ff", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -68, y = 41, image = "data/Freljord.png"), size = .065) +
+  
+  annotate("text", x = -35, y = 25, label = "Noxus", color = "#b70002", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -32, y = 28.5, image = "data/Noxus.png"), size = .065) +
+  
+  annotate("text", x = -73, y = 23, label = "Demacia", color = "#988972", size = 4.5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -69.5, y = 26.5, image = "data/Demacia.png"), size = .065) +
+  
+  annotate("text", x = -7, y = 38.5, label = "Ionia", color = "#e0afc0", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -4.6, y = 42, image = "data/Ionia.png"), size = .065) +
+  
+  annotate("text", x = -40, y = -13, label = "Shurima", color = "#624f2e", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -36.5, y = -10, image = "data/Shurima.png"), size = .065) +
+  
+  annotate("text", x = -55.5, y = -11.9, label = "Targon", color = "#7378b3", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -52.25, y = -7.5, image = "data/Targon.png"), size = .065) +
+  
+  annotate("text", x = -15, y = -23, label = "Icathia/Void", color = "#891ebc", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -14, y = -16.5, image = "data/Void.png"), size = .065) +
+  
+  annotate("text", x = -10.5, y = -7.75, label = "Ixtal", color = "#61b595", size = 5, hjust = 0, family = "Californian FB") +
+  geom_image(aes(x = -12.5, y = -1, image = "data/Ixtal.png"), size = .065) +
+  
+  annotate("text", x = -19.5, y = 10.75, label = "Piltover &\nZaun", color = "#fca370", size = 5, hjust = 0, vjust = 1, family = "Californian FB") +
+  geom_image(aes(x = -20.5, y = 20, image = "data/Piltover.png"), size = .065) +
+  geom_image(aes(x = -20.5, y = 15, image = "data/Zaun.png"), size = .065) +
+  
+  annotate("text", x = 5, y = 9, label = "Bilgewater", color = "#71301b", size = 5, hjust = 0, vjust = 1, family = "Californian FB") +
+  geom_image(aes(x = 9.5, y = 12, image = "data/Bilgewater.png"), size = .065) +
+  
+  annotate("text", x = 18, y = -6, label = "Shadow\nIsles", color = "#1e6276", size = 5, hjust = 1, vjust = 1, family = "Californian FB") +
+  geom_image(aes(x = 14.5, y = -2, image = "data/Shadow_Isles.png"), size = .065) +
+  
+  annotate("text", x = -117, y = -15, label = "Welcome to\nRUNETERRA", color = "#2e2f2f", size = 20, hjust = 0, vjust = .5, family = "Garamond", fontface = "bold") +
+  
+  theme(legend.position="none",
+        panel.background = element_rect(color = "#090f17", fill = "#d6d8d9"))
+
+runeterra_plot
+
+ggsave("Results/FinalMap-30.png", runeterra_plot, width = 14, height = 7.95)
+```
+
+
+
+
+

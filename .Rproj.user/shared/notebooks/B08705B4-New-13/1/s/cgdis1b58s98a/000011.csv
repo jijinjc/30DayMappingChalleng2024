@@ -1,0 +1,14 @@
+"0","countrysf = geodata::gadm(
+"
+"2","警告信息:
+"
+"2","In class(object) <- ""environment"" :"
+"2","
+ "
+"2"," 把class(x)设成""environment""集空属性; 其结果不再是S4目标对象
+"
+"0","  country = ""JPN"","
+"0","  level = 1,"
+"0","  path = file.path(getwd(), ""data"")"
+"0",") %>%"
+"0","  st_as_sf()"

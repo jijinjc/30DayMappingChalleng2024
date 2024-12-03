@@ -1,0 +1,226 @@
+---
+title: "New-13"
+author: "Jack Chen"
+date: "2024-11-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(sf)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+library(raster)
+library(rWind)
+library(lubridate)
+library(classInt)
+library(metR)
+library(oce)
+library(terra)
+library(hms)
+library(giscoR)
+library(rayshader)
+library(elevatr)
+library(geodata)
+library(magick)
+loadfonts(device = "win")
+```
+
+```{r}
+countrysf = geodata::gadm(
+  country = "JPN",
+  level = 1,
+  path = file.path(getwd(), "data")
+) %>%
+  st_as_sf()
+  
+countrysf = countrysf %>%
+  dplyr::filter(NAME_1 %in% c("Niigata", "Nagano"))
+  st_as_sf()
+```
+
+```{r eval=FALSE}
+url = "https://data.hydrosheds.org/file/HydroRIVERS/HydroRIVERS_v10_as_shp.zip"
+destfile = basename(url)
+
+download.file(
+  url = url,
+  destfile = destfile,
+  mode = "wb"
+)
+
+unzip(destfile)
+```
+
+```{r}
+filenames = list.files(
+  path = file.path(getwd(),"data/HydroRIVERS_v10_as_shp"),
+  pattern = ".shp",
+  full.names = TRUE
+)
+```
+
+```{r}
+countrybbox = sf::st_bbox(countrysf)
+#China 
+# xmin      ymin      xmax      ymax 
+ # 73.55770  18.15931 134.77393  53.56086 
+
+#Japan 
+# xmin      ymin      xmax      ymax 
+# 122.93320  24.04542 153.98694  45.52279
+
+#Niigata + Nagano
+# xmin      ymin      xmax      ymax 
+# 137.32928  35.19485 139.90210  38.54642 
+```
+
+```{r, fig.height=20, fig.width=20}
+#China 
+# bbox_wkt = "POLYGON((
+#     73.55770 18.15931,
+#     73.55770 53.56086,
+#     134.77393 53.56086,
+#     134.77393 18.15931,
+#     73.55770 18.15931
+# ))"
+
+#Japan 
+# bbox_wkt = "POLYGON((
+# 122.93320 24.04542,
+# 122.93320 45.52279,
+# 153.98694 45.52279,
+# 153.98694 24.04542,
+# 122.93320 24.04542
+# ))"
+
+#Niigata + Nagano
+bbox_wkt = "POLYGON((
+137.32928 35.19485,
+137.32928 38.54642,
+139.90210 38.54642,
+139.90210 35.19485,
+137.32928 35.19485
+))"
+
+country_rivers = st_read(
+  filenames,
+  wkt_filter = bbox_wkt
+) 
+
+country_rivers = country_rivers %>%
+  st_intersection(
+    countrysf
+  )
+
+plot(sf::st_geometry(country_rivers))
+```
+
+```{r}
+sort(
+  unique(
+    country_rivers$ORD_FLOW
+  )
+)
+
+crs_jpn = "+proj=tmerc +lat_0=26 +lon_0=124 +k=0.9999 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs"
+
+jpn_river_width = country_rivers %>%
+  mutate(
+    width = as.numeric(ORD_FLOW),
+    width = case_when(width == 4 ~ 16,
+                      width == 5 ~ 14,
+                      width == 6 ~ 12,
+                      width == 7 ~ 10,
+                      TRUE ~ 0)
+  ) %>%
+  st_as_sf() %>%
+  st_transform(crs = crs_jpn)
+```
+
+```{r}
+countrysf.m = st_union(countrysf) %>%
+  st_as_sf()
+
+dem = elevatr::get_elev_raster(
+  locations = st_as_sf(countrysf.m),
+  z = 9, clip = "locations"
+)
+
+dem_jpn = dem %>%
+  terra::rast() %>%
+  terra::project(crs_jpn)
+
+dem_matrix = rayshader::raster_to_matrix(dem_jpn)
+```
+
+```{r fig.width=10, fig.height=10}
+dem_matrix %>%
+  rayshader::height_shade(
+    texture = colorRampPalette(
+      c(
+        "#d9cfc6",
+        "#FF9400"
+      )
+    )(128)
+  ) %>%
+  rayshader::add_overlay(
+    rayshader::generate_line_overlay(
+      geometry = jpn_river_width,
+      exten = dem_jpn,
+      heightmap = dem_matrix,
+      color = "#0061B5",
+      linewidth = jpn_river_width$width,
+      data_column_width = "width"
+    ), alphalayer = 1
+  ) %>%
+  rayshader::plot_3d(
+    dem_matrix,
+    zscale = 60,
+    solid = FALSE,
+    shadow = T,
+    shadow_darkness = 1,
+    background = "white",
+    windowsize = c(600, 600),
+    zoom = 0.5,
+    phi = 89,
+    theta = 0
+  )
+```
+
+```{r}
+file_name = "NN_Japan.png"
+
+u <- "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/photo_studio_loft_hall_4k.hdr"
+hdri_file <- basename(u)
+download.file(
+    url = u,
+    destfile = hdri_file,
+    mode = "wb"
+)
+```
+
+```{r}
+rayshader::render_highquality(
+  filename = file_name,
+  preview = T,
+  light = F,
+  environment_light = file.path(getwd(), "data", hdri_file),
+  intensity_env = 1,
+  interactive = FALSE,
+  width = 3000,
+  height = 3000
+)
+```

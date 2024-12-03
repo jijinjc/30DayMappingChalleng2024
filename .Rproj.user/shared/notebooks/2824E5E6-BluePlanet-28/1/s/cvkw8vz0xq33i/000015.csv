@@ -1,0 +1,7 @@
+"0","chl = read_sf(""data/gadm41_CHL_shp/gadm41_CHL_0.shp"")"
+"0","arg = read_sf(""data/gadm41_ARG_shp/gadm41_ARG_0.shp"") "
+"0","ata = read_sf(""data/gadm41_ATA_shp/gadm41_ATA_0.shp"")"
+"0","bathymetry = raster(""data/drake_bathymetry/bathymetry.tif"")"
+"0","b_spdf = as(bathymetry, ""SpatialPixelsDataFrame"")"
+"0","b_df = as.data.frame(b_spdf)"
+"0","colnames(b_df) <- c(""value"", ""x"", ""y"")"

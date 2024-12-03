@@ -1,0 +1,121 @@
+---
+title: "Typography-19"
+author: "Jack Chen"
+date: "2024-11-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+library(ggimage)
+
+loadfonts(device = "win")
+```
+
+```{r}
+robsonbb = matrix(data = c(-123.13735655197026, -123.12085917229842, 49.282206740147615, 49.29260115813446),
+                  nrow = 2,
+                  byrow = TRUE)
+
+colnames(robsonbb) = c("min", "max")
+rownames(robsonbb) = c("x", "y")
+
+robsonbb
+```
+
+```{r}
+robsonmajor = robsonbb %>%
+  opq(timeout = 50) %>%
+  add_osm_feature(key = "highway", 
+                  value = c("motorway", "primary", "secondary")) %>%
+  osmdata_sf()
+
+robsonminor = robsonbb %>%
+  opq(timeout = 50) %>%
+  add_osm_feature(key = "highway", 
+                  value = c("tertiary", "residential")) %>%
+  osmdata_sf()
+```
+
+```{r}
+street_plot <- ggplot() +
+  geom_sf(data = robsonmajor$osm_lines,
+          inherit.aes = FALSE,
+          color = "gray20",
+          alpha = 0.8,
+          linewidth = 1) + 
+  geom_sf(data = robsonminor$osm_lines,
+          inherit.aes = FALSE,
+          color = "gray20",
+          alpha = 0.8,
+          linewidth = 1)
+```
+
+```{r}
+robsonramen = read.csv("data/RamenRobson.csv") %>%
+  mutate(image = "data/ramen.png")
+robsonst = st_read("data/robsonst.geojson")
+```
+
+```{r fig.height=9, fig.width=8.5}
+ramen_plot = street_plot + 
+  geom_sf(data = robsonst,
+          inherit.aes = FALSE,
+          color = "gray20",
+          linewidth = 3) +
+  geom_image(data = robsonramen,
+             mapping = aes(x = longitude, y = latitude, image=image),
+             #color = "transparent",
+             size = 0.1, 
+             inherit.aes = FALSE) +
+  #geom_segment(aes(x = -123.12750, xend = -123.12900, y = 49.28623, yend = 49.28623), color = "#f18920", linewidth = 1.3) + #Horin
+  #annotate("rect", xmin = -123.13047, xmax = -123.12895, ymin = 49.28605, ymax = 49.28640, color = "transparent", fill="white", alpha = 0.3) + 
+  annotate("text", x = -123.12855, y = 49.28662, label = "Horin Ramen ", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  #geom_segment(aes(x = -123.12890, xend = -123.12800, y = 49.28754, yend = 49.28851), color = "#f18920", linewidth = 1.3) + #Danbo
+  annotate("text", x = -123.12995, y = 49.28800, label = "Ramen Danbo", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  #geom_segment(aes(x = -123.13382, xend = -123.13358, y = 49.29033, yend = 49.28931), color = "#f18920", linewidth = 1.3) + #Santouka
+  annotate("text", x = -123.13498, y = 49.28993, label = "Hokkaido Ramen\nSantouka", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  #geom_segment(aes(x = -123.13332, xend = -123.13185, y = 49.29068, yend = 49.29068), color = "#f18920", linewidth = 1.3) + #Maruhachi
+  annotate("text", x = -123.13305, y = 49.29068, label = "Maruhachi Ra-men", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  #geom_segment(aes(x = -123.13450, xend = -123.13332, y = 49.29190, yend = 49.29172), color = "#f18920", linewidth = 1.3) + #Tsukiya
+  annotate("text", x = -123.13435, y = 49.29190, label = "Tonkotsu Ramen Tsukiya", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  #geom_segment(aes(x = -123.13508, xend = -123.13513, y = 49.29169, yend = 49.29033), color = "#f18920", linewidth = 1.3) + #Kintaro 
+  annotate("text", x = -123.13593, y = 49.29140, label = "Kintaro Ramen", color = "#f18920", size = 6, fontface = "bold", hjust = 0, family = "Permanent Marker") + 
+  annotate("text", x = -123.13250, y = 49.28965, label = "Robson Street", family = "Modak", color = "darkred", size = 9, hjust = 0, angle=-45) +
+  geom_richtext(aes(x = -123.13595, y = 49.28700, label = paste0("Ramen is a comforting food. It is a rich, hearty, yet complex food that<br>comes in various different shapes and forms. It may be surprising that<br>Vancouver is home to some of the most wonderful <span style = 'color:#f18920;'>Japanese ramen shops</span>,<br>and many of which is focused on this 1.5km street on the<br>Northwestern end of the City's downtown called <span style = 'color:darkred;'>Robson Street</span><br>")), color = "white", size = 5.5, family = "Agency FB", hjust=0,inherit.aes = F, fill = NA, label.color = NA) + 
+  coord_sf(ylim = c(49.2855, 49.2922),
+           xlim = c(-123.136, -123.126),
+           expand = FALSE) + 
+  #annotation_scale() +
+  theme_void() + 
+  geom_richtext(aes(x = -123.13595, y = 49.28605, label = paste0("<span style = 'color:darkred;'>Robson Street's</span><br><span style = 'color:#f18920;'>Japanese Ramen Shops</span>")), size = 10, family = "Broadway",hjust = 0, inherit.aes = F, fill = NA, label.color = NA) + 
+  theme(
+    plot.title = element_markdown(size = 36, family="Broadway"),
+    plot.subtitle = element_markdown(size = 14, family="Agency FB"),
+    plot.margin = margin(t = 10, b = 10, l = 10, r = 10),
+    panel.background = element_rect(color = "black", fill = "black")
+  ) 
+  
+  
+ramen_plot
+
+ggsave("Results/Typography-19.jpg", ramen_plot, bg="white", height=9, width=8.5)
+```

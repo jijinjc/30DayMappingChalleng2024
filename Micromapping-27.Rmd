@@ -1,0 +1,72 @@
+---
+title: "Micromapping-28"
+author: "Jack Chen"
+date: "2024-11-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+loadfonts(device = "win")
+```
+
+```{r fig.width=10, fig.heigh=8}
+park = st_read("data/MemorialWestPark.geojson")
+stuff = st_read("data/stuff.geojson") %>%
+  mutate(Type = case_when(
+    grepl("parking", Type, ignore.case = TRUE) ~ "Parking",        # Rename if "parking"
+    grepl("Baseball", Type, ignore.case = TRUE) ~ "Baseball-Field",  # Rename if "Baseball"
+    TRUE ~ Type)) %>%
+  rename(Amenity = Type)
+path = st_read("data/path.geojson")
+
+intersectionplot = ggplot() +
+  geom_sf(data = park,
+          inherit.aes = FALSE,
+          color = NA,
+          fill = "olivedrab3",
+          linewidth = 0) +
+  geom_sf(data = stuff,
+          inherit.aes = FALSE,
+          aes(fill = Amenity),
+          color = NA) +
+  geom_sf(data = path,
+          inherit.aes = FALSE,
+          color = "black",
+          linewidth = 0.1) +
+  theme_void() +
+  scale_fill_manual(values = setNames(stuff$Color, stuff$Amenity)) +
+  guides(fill = guide_legend(ncol = 5)) +
+  labs(title = "Memorial West Park") + 
+  theme(
+    plot.title = element_markdown(size = 36, family="Mea Culpa"),
+    legend.position = "bottom",
+    legend.title = element_text(family = "Mea Culpa", size = 20),
+    legend.text = element_text(family = "Mea Culpa", size = 18)  
+  )
+  # coord_sf(ylim = c(49.25523667182594, 49.256236378523454),
+  #          xlim = c(-123.2372857180815, -123.23535075291468),
+  #          expand = FALSE)
+
+intersectionplot
+
+ggsave("Results/Mircomapping-27.jpg", intersectionplot, bg="white", height=8, width=10)
+```

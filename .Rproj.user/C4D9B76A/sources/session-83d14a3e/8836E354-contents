@@ -1,0 +1,92 @@
+---
+title: "AllMap"
+author: "Jack Chen"
+date: "2024-12-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Journey
+
+My first map is about a journey of a bunch of internet celebrities that I might be a little bit too obsessed with. Regardless, they had recently did a sponsored video where they have to go to different locations in LA, finish tasks, and the first team to finish all tasks wins the challenge! So, using some of my art and the art they had in the video, I created the following map. Using color to represent which team was ahead during the journey, as well as images to describe the tasks and highlight the team, I displayed the journey in a very simple manner. The one thing that might be confusing is that even though Team Rocket arrived at the final destination first, Team Pikachu won because they finished the task first.
+
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Journey-05.jpg")
+```
+
+# AI
+
+The AI map was a way for me to kind of kick back and relax to see what horrible prompt the AI could generate. I initially wanted DALL-E to draw a complete map, but I felt that the messy handwriting would not do it for me. Thus, I instead opted to tell Chat-GPT to "surprise me with a fun little code to plot your own map" and this is what it generated for me. 
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/AI-09.png")
+```
+
+# Arctic
+
+For the arctic map, I wanted to revisit an old friend of mine: Normalized Difference Snow Index (NDSI). I wanted to find a way to get NDSI data and map the NDSI for an Arctic region, and truly see how much snow there is. Luckily, it would seem that there is still a lot of snow in Nunavut, and even the water was frozen when the tif image was created. This data was actually collected through Google Earth Engine
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Arctic-11.jpg")
+```
+
+# New Tool
+
+For the new tool map, I wanted to try making a 3D map. In fact, I was going to make a second 3D map originally, but this was very time consuming and so I kept this extremely simple map for the new tool map. This is a map of Niigata and Nagano Prefectures in Japan, which is the home of the largest river in the Country, alongside many other rivers, too. Simply put, this is a map of the river in the two regions, and additionally elevation is shown as well to capture the 3d element.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/New-13.png")
+```
+
+# My Data
+
+Another simple map I made was this map about my own personal data. I feel like I had the honour of going to many different countries in the world, and I wanted to see exactly how many countries I've been to. Of course, certain countries I travel to and from all the time, and they are distinguished from the ones I have been to only once. Using the Gestalt principles, I highlight which countries fall into which categories, and helps to better visualize these countries.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Mydata-15.png")
+```
+
+# Typography
+
+For the typography map, it was really hard thinking of an idea to focus on only texts. I opted to look at the ramen shops in Vancouver, and by purposefully making the background darker colored while the text is brighter, it brings the focus specifically on these typography. Additionally, Different text fonts are used to distinguish the type of text, whether if it is a street, a ramen shop, the title, or the subtitle.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Typography-19.jpg")
+```
+
+# Micromapping
+
+The purpose of choosing Memorial West Park, a park that I have lived next to since 2014, is because I wanted to get revenge at a mapping project that I failed in grade 5. To recreate the amenities in the park as accurate as possible, I referred to the geojson maps and created these polygons by hand. I do feel that the coloring of the map is quite bland, and so to spice it up and create a dichotomy, I wanted to use an extremely fancy text. Of course, there is a lot on the screen, but it highlights how many activities there are at this very small park.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Micromapping-27.jpg")
+```
+
+# Blue Map
+
+The main purpose of this blue map originally was to create a map that shows the Drake Passage, a very turbulent and dangerous water between South America and Antarctica. This meant showing both thhe bathymetry and the winds at this location. However, I could not get the winds to work, so instead the map only shows bathymetry. Regardless, I try to show the tip of the Antarctic Peninsula and South America to give a general idea of where this is, and with the bathymetry,while it isn't the prettiest, it adds depth to the map.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/BluePlanet-28.jpg")
+```
+
+# Overture
+
+Overture is another new tool I learned to use, and it provides many interesting data including the height of buildings, which is plotted here in this map. While the data was hard to download, it was interesting to see that I was able to test with the 3d elements of this data. While the 3d elements aren't shown here in this map, it is very interesting to try and see the way that buildings are in Downtown Vancouver, despite it not being the most accurate. Other aesthetic choices include the choice of coloring the land differently, showing which areas we are focused on and which belong to the rest of Vancouver, and the use of blue is to obviously show the presence of water, making this feel more like a normal map with land and water alike.
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/Overture-29.jpg")
+```
+
+# Final Map
+
+This final map was a very interesting map. In R, many of the aesthetic choices were to color each fictional region to their respective colors, and playing around with the position of texts and images to make it look pretty. Many of the way that images and text are presented here for each region is meant to mimic the original methods used by the people who made this map. Additionally, polygons are simplified because this map is meant to be a little introduction to the region, and thus many of the borders are not exactly the same. 
+
+```{r echo=FALSE}
+knitr::include_graphics("Results/FinalMap-30.png")
+```

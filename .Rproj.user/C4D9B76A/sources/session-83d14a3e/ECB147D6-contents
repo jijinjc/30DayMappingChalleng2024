@@ -1,0 +1,122 @@
+---
+title: "Overture-29"
+author: "Jack Chen"
+date: "2024-11-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r library setup, include=FALSE}
+library(ggplot2)
+library(osmdata)
+library(dplyr)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(kableExtra)
+library(mapview)
+library(reshape2)
+library(ggtext)
+library(glue)
+library(reshape2)
+library(plotly)
+library(extrafont)
+library(ggspatial)
+library(ggimage)
+library(rdeck)
+library(tigris)
+library(arrow)
+library(overturemapsr)
+library(leaflet)
+options(tigris_use_cache = TRUE)
+loadfonts(device = "win")
+```
+
+```{r}
+#vanbb = getbb("Vancouver")
+
+vanbb = matrix(data = c(-123.26751375133634, -123.06504856896412, 49.20243957373458, 49.29765842148413),
+                  nrow = 2,
+                  byrow = TRUE)
+
+colnames(vanbb) = c("min", "max")
+rownames(vanbb) = c("x", "y")
+
+vanbb
+
+xmin = vanbb[1]
+ymin = vanbb[2]
+xmax = vanbb[3]
+ymax = vanbb[4]
+
+dtbb = matrix(data = c(-123.15178497302955, -123.0998960119333, 49.26936509106224, 49.29765842148413),
+                  nrow = 2,
+                  byrow = TRUE)
+
+colnames(dtbb) = c("min", "max")
+rownames(dtbb) = c("x", "y")
+```
+
+```{r}
+van_all = st_read("data/Vancouver.geojson") 
+
+van_bound = van_all %>%
+  filter(name %in% c("Downtown", "West End"))
+
+vanparks = st_read("data/van-parks.geojson")
+
+stanley = vanparks %>%
+  filter(park_name == "Stanley Park")
+```
+
+```{r}
+all_overture = get_all_overture_types()
+buildings <- record_batch_reader(overture_type = 'building', bbox = c(xmin, ymin, xmax, ymax))
+```
+
+```{r}
+van_builds = buildings %>%
+  select(id, geometry, height) %>%
+  #collect() %>%
+  mutate(height = ifelse(is.na(height), 8, height)) %>%
+  st_transform(crs = 4326) %>%
+  st_as_sf()
+
+van_builds$geometry <- st_cast(van_builds$geometry, "POLYGON")
+
+van_builds.c = van_builds %>%
+  st_intersection(van_bound)
+```
+
+```{r fig.width=8, fig.height=7.8}
+vancouver = ggplot() +
+  geom_sf(data = van_all,
+          inherit.aes = F,
+          color = NA,
+          fill = "#d5c3a4") + 
+  geom_sf(data = van_bound,
+          inherit.aes = F,
+          color = NA,
+          fill = "#f9ede1") +
+  geom_sf(data = van_builds.c,
+          inherit.aes = FALSE,
+          aes(fill = height),
+          linewidth = 0) +
+  scale_fill_gradient(low = "darkgreen", high = "#d51e15", guide = "none") +
+  theme_void() +
+  theme(plot.title = element_markdown(size = 26, family="Bauhaus 93", hjust = 0.5),
+        panel.background = element_rect(color = "#afdbfa", fill = "#afdbfa")) +
+  annotate("text", x = -123.1475, y = 49.2725, label = "Rest of Vancouver", color = "#958973", size = 3, hjust = 0, family = "Kristen ITC") + 
+  annotate("text", x = -123.11, y = 49.2710, label = "Rest of Vancouver", color = "#958973", size = 3, hjust = 0, family = "Kristen ITC") + 
+  labs(title = "Height of Buildings in<br><span style = 'color:#f9ede1;'>Downtown</span>, Vancouver,<br>from <span style = 'color:darkgreen;'>Low</span> to <span style = 'color:#d51e15;'>High</span>") +
+  coord_sf(ylim = c(dtbb[2], dtbb[4]),
+           xlim = c(dtbb[1], dtbb[3]),
+           expand = FALSE)
+
+vancouver
+
+ggsave("Results/Overture-29.jpg", vancouver, bg="#afdbfa", height=7.75, width=8)
+```

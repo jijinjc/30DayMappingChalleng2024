@@ -1,0 +1,8 @@
+"0","# Assuming 'stuff' is your dataset with columns like 'Type', 'Color', 'Lat', 'Long'"
+"0","# Example dataset (replace this with your actual data)"
+"0","stuff <- data.frame("
+"0","  Type = c(""Park"", ""Trail"", ""Park"", ""Trail""),"
+"0","  Color = c(""green"", ""blue"", ""green"", ""blue""),"
+"0","  Lat = c(40.748817, 40.749617, 40.747417, 40.746917),"
+"0","  Long = c(-73.985428, -73.986928, -73.987328, -73.988428)"
+"0",")"

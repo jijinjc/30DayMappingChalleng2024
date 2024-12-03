@@ -1,0 +1,76 @@
+---
+title: "MyData-15"
+author: "Jack Chen"
+date: "2024-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(osmdata)
+library(dodgr)
+library(sf)
+library(maptiles)
+library(tidyterra)
+library(dplyr)
+library(ggtext)
+library(extrafont)
+library(ggimage)
+library(rworldmap)
+library(tmap)
+library(sysfonts)
+library(showtext)
+```
+
+```{r}
+countries = st_read("data/countries.geo.json")
+
+beento = countries %>%
+  mutate(times = case_when(id %in% c("CAN", "CHN", "USA") ~ "2+",
+                           id %in% c(c("ATA", "AUT", "LUX", "MEX", "BEL", "CHL", "CHE", "NLD", "CUB", "DEU", "ECU", "SGP", "FRA", "GBR", "THA", "HKG", "TWN", "TZA", "ISL", "CZE")) ~ "1",
+                           TRUE ~ "0")) %>%
+  st_transform(crs = 4326)
+```
+
+```{r fig.width=8, fig.height=6}
+ocean <- st_polygon(list(cbind(c(seq(-180, 179, len = 100), rep(180, 100), 
+                        seq(179, -180, len = 100), rep(-180, 100)),
+                      c(rep(-90, 100), seq(-89, 89, len = 100),
+                        rep(90, 100), seq(89, -90, len = 100))))) |>
+  st_sfc(crs = 4326) |>
+  st_as_sf()
+
+font_add("Harlow Solid Italic", regular = "C:/Windows/HARLOWSI.TTF")
+
+showtext_auto()
+beenMap = ggplot() +
+  geom_sf(data = ocean, fill = "#a8d8eb") +
+  geom_sf(data = beento,
+          aes(fill = times),
+          inherit.aes = F) + 
+  scale_fill_manual(values = c(
+    "2+" = "#756bb1",
+    "1" = "#bcbddc",
+    "0" = "#efedf5"
+  )) +
+  coord_sf(crs = "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 
+           +datum=WGS84 +units=m +no_defs", expand = F) +
+  theme_void() +
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        plot.title = element_markdown(size = 75, hjust = 0.5, colour = "white", family = "Harlow Solid Italic"),
+        plot.subtitle = element_markdown(size = 50, hjust = 0.5, family = "Harlow Solid Italic", colour = "white"),
+        #panel.background = element_rect(color = "#afdbfa", fill = "#afdbfa"),
+        legend.position = "none") +
+  labs(title = "Countries I Have Been To", subtitle = "<span style = 'color:#efedf5;'>Never</span>, <span style = 'color:#bcbddc;'>Once</span>, <span style = 'color:#756bb1;'>Multiple Times</span>") 
+
+beenMap
+
+ggsave("Results/Mydata-15.png", beenMap, bg="black", width = 8, height = 6)
+```
+
